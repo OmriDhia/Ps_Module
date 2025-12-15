@@ -1,0 +1,52 @@
+
+---
+title: prestashop:api-client
+---
+
+# `prestashop:api-client`
+
+## Informations
+
+* Path: `src/PrestaShopBundle/Command/APIClientCommand.php`
+* Arguments:
+  * `action`: Action to perform, create/delete.
+  * `client-id`: Client ID.
+* Options:
+  * `--name`: Client Name
+  * `--description`: Client Description (Created by CLI command., by default)
+  * `--all-scopes`: Automatically assign all available scopes
+  * `--scopes`: OClient list of scopes separated by commas
+  * `--secret-only`: Only output secret value after creation
+  * `--timeout`: Timeout in seconds (3600, by default)
+  * `--secret`: Force secret value (auto generated, by default)
+
+## Description
+
+Manage Admin API client.
+
+## Usage
+
+Create an AminApi client.
+
+```bash
+bin/console prestashop:api-client create DevDocs
+```
+
+Create an AminApi client with custom description.
+
+```bash
+bin/console prestashop:api-client create DevDocs --description="Made by DevDocs"
+```
+```
+
+Create an AminApi client and display only secret.
+
+```bash
+bin/console prestashop:api-client create DevDocs --secret-only
+```
+
+Delete an AminApi client.
+
+```bash
+bin/console prestashop:api-client delete DevDocs
+```

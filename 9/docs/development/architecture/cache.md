@@ -1,0 +1,17 @@
+---
+title: Cache
+summary: "The folder `/var/cache/<ENV>` contains all the cached files used by Symfony to improve performance. It also includes the PrestaShop class index and the Smarty cache."
+---
+
+# Cache
+
+## Classes in the root namespace and overrides
+
+The `/var/cache/<ENV>/class_index.php` file contains the link between the class and the declaration file. If there is a caching issue, this file can be safely deleted.
+
+## Smarty
+
+When the store's front-end doesn't quite reflect your changes and emptying the browser's cache is not effective, try emptying the following folders:
+
+- `/var/cache/<ENV>/smarty/cache`
+- `/var/cache/<ENV>/smarty/compile`

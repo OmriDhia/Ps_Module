@@ -1,0 +1,74 @@
+name: Update API json doc
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  update-api:
+    name: Update API doc json
+    permissions:
+      contents: write
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - ps_branch: 9.0.x
+            doc_branch: 9.x
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: mbstring, intl, gd, xml, dom, json, fileinfo, curl, zip, iconv
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Checkout PrestaShop
+      - uses: actions/checkout@v4
+        name: Checkout PrestaShop repository
+        with:
+          repository: PrestaShop/PrestaShop
+          ref: ${{ matrix.ps_branch }}
+
+      # Now install the shop
+      - name: Setup Environment
+        timeout-minutes: 15
+        uses: ./.github/actions/setup-env
+        with:
+          PHP_VERSION: 8.1
+          ENABLE_SSL: 'true'
+          INSTALL_AUTO: 'true'
+      - name: Setup Environment failure
+        uses: ./.github/actions/setup-env-export-logs
+        with:
+          DOCKER_PREFIX: docs
+          ARTIFACT_NAME: setup-symfony-console-${{ matrix.app-id }}
+          ENABLE_SSL: 'true'
+          INSTALL_AUTO: 'true'
+        if: failure()
+
+      # Checkout Docs
+      - uses: actions/checkout@v4
+        name: Checkout Docs
+        with:
+          path: ${{ github.workspace }}/var/docs
+          ref: ${{ matrix.doc_branch }}
+          token: ${{ secrets.JARVIS_API_TOKEN }}
+
+      - name: Execute core command to export the JSON API doc
+        run: |
+          docker exec docs-prestashop-git-1 php -d memory_limit=-1 ./bin/console prestashop:generate:apidoc > ${{ github.workspace }}/var/docs/admin-api/swagger-doc/openapi.json
+
+      - name: Check modifications and commit if any
+        working-directory: ${{ github.workspace }}/var/docs
+        run: |
+          git config --global user.name 'Jarvis'
+          git config --global user.email 'jarvis@prestashop.com'
+          git commit -am "Auto updated API doc json" && git push || echo "No changes to commit"
